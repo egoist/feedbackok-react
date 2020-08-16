@@ -6,23 +6,20 @@ import { css } from 'emotion'
 import { IssueIcon } from './IssueIcon'
 import { IdeaIcon } from './IdeaIcon'
 import { OtherIcon } from './OtherIcon'
-import type { Config } from './config'
 import { useProjectData } from './useProjectData'
 import { API_ENDPOINT } from './constants'
 import { Spinner } from './Spinner'
-import { SetRequired } from './types/set-required'
-
-export type { Config }
-
-export type FormConfig = SetRequired<Config, 'pid'>
 
 export * from './constants'
 
 export const FeedbackForm: React.FC<{
-  config: FormConfig
-}> = ({ config }) => {
-  if (!config.pid) {
-    return null
+  pid: string
+  from?: string
+  closeHandler?: () => void
+  resizeHandler?: (height: number) => void
+}> = ({ pid, from, closeHandler, resizeHandler }) => {
+  if (!pid) {
+    throw new Error(`[feedbackok] pid prop is required`)
   }
 
   const { styles, theme } = createStyles()
@@ -35,14 +32,14 @@ export const FeedbackForm: React.FC<{
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const rootRef = React.useRef<HTMLDivElement>(null)
 
-  const project = useProjectData(config.pid)
+  const project = useProjectData(pid)
 
   React.useEffect(() => {
     setTimeout(() => {
       if (rootRef.current) {
         const height = rootRef.current.clientHeight
-        if (config.resizeHandler) {
-          config.resizeHandler(height)
+        if (resizeHandler) {
+          resizeHandler(height)
         }
       }
     })
@@ -51,7 +48,7 @@ export const FeedbackForm: React.FC<{
   const handleSubmit = (e: any) => {
     e.preventDefault()
     setIsSubmitting(true)
-    fetch(`${API_ENDPOINT}/feedback/${config.pid}`, {
+    fetch(`${API_ENDPOINT}/feedback/${pid}`, {
       method: 'POST',
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
@@ -60,7 +57,7 @@ export const FeedbackForm: React.FC<{
       body: JSON.stringify({
         content,
         emotion_index: emotionIndex,
-        from: config.from || undefined,
+        from: from || undefined,
       }),
     }).then((res) => {
       setIsSubmitting(false)
@@ -78,7 +75,7 @@ export const FeedbackForm: React.FC<{
     setContent('')
   }
 
-  const closeButtonForResult = config.closeHandler && (
+  const closeButtonForResult = closeHandler && (
     <button
       className={clsx(
         styles.iconButton,
@@ -87,7 +84,7 @@ export const FeedbackForm: React.FC<{
           right: '20px',
         }),
       )}
-      onClick={config.closeHandler}
+      onClick={closeHandler}
     >
       <CloseIcon />
     </button>
@@ -176,7 +173,7 @@ export const FeedbackForm: React.FC<{
               ? `Give us feedback`
               : `What's on your mind?`}
           </div>
-          {config.closeHandler && (
+          {closeHandler && (
             <button
               className={clsx(
                 styles.iconButton,
@@ -184,7 +181,7 @@ export const FeedbackForm: React.FC<{
                   right: 0,
                 }),
               )}
-              onClick={config.closeHandler}
+              onClick={closeHandler}
             >
               <CloseIcon />
             </button>

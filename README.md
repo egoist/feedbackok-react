@@ -14,7 +14,7 @@ yarn add feedbackok-react
 import { FeedbackForm } from 'feedbackok-react'
 
 const App = () => {
-  return <FeedbackForm config={{ pid: 'xxx' }} />
+  return <FeedbackForm pid="xxx" />
 }
 ```
 
