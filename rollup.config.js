@@ -21,7 +21,7 @@ const getConfig = ({ dts } = {}) => {
           },
           {
             format: 'esm',
-            file: 'dist/index.mjs',
+            file: 'dist/index.esm.js',
           },
         ],
     plugins: [
